@@ -1,0 +1,58 @@
+{
+  "name": "CINEMAGIC",
+  "short_name": "CINEMAGIC",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#222222",
+  "description": "Aplikasi berbagi cerita dengan peta, kamera, dan pengalaman PWA.",
+  "icons": [
+    {
+      "src": "images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://via.placeholder.com/1280x720.png?text=CINEMAGIC+Stories",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Stories List"
+    },
+    {
+      "src": "https://via.placeholder.com/750x1334.png?text=Add+Story",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Add Story"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "+ Tambah Story",
+      "short_name": "Tambah",
+      "description": "Buka halaman tambah story",
+      "url": "/#/add-story",
+      "icons": [{ "src": "images/logo.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Lihat Stories",
+      "short_name": "Stories",
+      "description": "Buka daftar stories",
+      "url": "/#/stories",
+      "icons": [{ "src": "images/logo.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ],
+  "categories": ["social", "productivity"],
+  "prefer_related_applications": false
+}
