@@ -41,9 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // PWA: Daftarkan Service Worker untuk caching dan Background Sync
-  // Hindari pendaftaran saat pengembangan (localhost) agar HMR stabil
-  const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
-  if ('serviceWorker' in navigator && !isLocalhost) {
+  // Aktifkan juga di localhost agar mode offline & instal bisa diuji
+  if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       // Gunakan path relatif agar kompatibel di GitHub Pages (project pages)
       navigator.serviceWorker.register('./sw.js')

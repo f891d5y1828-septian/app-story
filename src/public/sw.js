@@ -36,6 +36,12 @@ if (self.workbox) {
     }),
   );
 
+  // Hindari caching berkas HMR (hot-update) saat dev agar tidak memicu abort
+  workbox.routing.registerRoute(
+    ({ url }) => url.pathname.includes('hot-update'),
+    new workbox.strategies.NetworkOnly({}),
+  );
+
   // Cache gambar - CacheFirst
   workbox.routing.registerRoute(
     ({ request }) => request.destination === 'image',
@@ -97,10 +103,10 @@ self.addEventListener('push', (event) => {
   const title = payload.title || 'CINEMAGIC';
   const options = {
     body: payload.body || 'Ada update terbaru dari CINEMAGIC',
-    icon: payload.icon || '/images/logo.png',
-    badge: payload.badge || '/images/logo.png',
+    icon: payload.icon || 'images/logo.png',
+    badge: payload.badge || 'images/logo.png',
     data: {
-      url: payload.url || '/#/stories',
+      url: payload.url || './#/stories',
       storyId: payload.storyId || null,
     },
     actions: [
@@ -117,11 +123,11 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const data = event.notification && event.notification.data ? event.notification.data : {};
 
-  let targetUrl = data.url || '/';
+  let targetUrl = data.url || './';
   if (event.action === 'open-detail' && data.storyId) {
-    targetUrl = `/#/story/${data.storyId}`;
+    targetUrl = `./#/story/${data.storyId}`;
   } else if (event.action === 'open-stories') {
-    targetUrl = '/#/stories';
+    targetUrl = './#/stories';
   }
 
   event.waitUntil(

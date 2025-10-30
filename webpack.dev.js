@@ -21,9 +21,10 @@ module.exports = merge(common, {
     host: 'localhost',
     allowedHosts: 'all',
     client: {
+      logging: 'none',
       overlay: {
         errors: true,
-        warnings: true,
+        warnings: false,
       },
     },
     hot: true,
