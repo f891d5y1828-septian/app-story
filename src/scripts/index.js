@@ -41,48 +41,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // PWA: Daftarkan Service Worker untuk caching dan Background Sync
-  // Aktifkan juga di localhost agar mode offline & instal bisa diuji
+  // Aktifkan hanya di production mode
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      // Gunakan path relatif agar kompatibel di GitHub Pages (project pages)
+      // Daftarkan Service Worker di semua mode (dev dan prod).
+      // HMR sudah dimatikan di konfigurasi dev, sehingga SW aman dijalankan.
       navigator.serviceWorker.register('./sw.js')
         .then((reg) => {
-          // Optional: log status
-          // console.log('SW registered', reg.scope);
-
-          // Setup tombol toggle push
-          const btn = document.getElementById('push-toggle');
-          const setBtnState = async () => {
-            const subscribed = await isSubscribed();
-            if (!btn) return;
-            btn.textContent = subscribed ? 'Matikan Notifikasi' : 'Aktifkan Notifikasi';
-            btn.setAttribute('aria-pressed', String(subscribed));
-          };
-          setBtnState();
-
-          if (btn) {
-            btn.addEventListener('click', async () => {
-              try {
-                const subscribed = await isSubscribed();
-                if (!subscribed) {
-                  if (!CONFIG.VAPID_PUBLIC_KEY && !localStorage.getItem('vapidPublicKey')) {
-                    alert('VAPID public key belum diisi. Silakan isi di CONFIG atau localStorage.vapidPublicKey');
-                    return;
-                  }
-                  await subscribe();
-                } else {
-                  await unsubscribe();
-                }
-                await setBtnState();
-              } catch (err) {
-                console.error('Push toggle error:', err);
-                alert('Gagal mengubah langganan notifikasi: ' + err.message);
-              }
-            });
-          }
+          console.log('Service Worker terdaftar:', reg.scope);
         })
         .catch((err) => {
-          // console.warn('SW registration failed', err);
+          console.warn('Pendaftaran Service Worker gagal:', err);
         });
     });
   }
@@ -123,4 +92,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     // App successfully installed
     if (installButton) installButton.style.display = 'none';
   });
+
+  // Push Notification Toggle: inisialisasi status dan aksi
+  const pushToggle = document.getElementById('push-toggle');
+
+  function updatePushUI(isOn) {
+    if (!pushToggle) return;
+    const permission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+    if (permission === 'denied') {
+      pushToggle.textContent = 'Notifikasi Ditolak';
+      pushToggle.setAttribute('aria-pressed', 'false');
+      pushToggle.disabled = true;
+      return;
+    }
+    if (permission === 'default') {
+      pushToggle.textContent = 'Aktifkan Notifikasi';
+      pushToggle.setAttribute('aria-pressed', 'false');
+      pushToggle.disabled = false;
+      return;
+    }
+    // permission === 'granted'
+    pushToggle.textContent = isOn ? 'Matikan Notifikasi' : 'Aktifkan Notifikasi';
+    pushToggle.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+    pushToggle.disabled = false;
+  }
+
+  async function initPushUI() {
+    if (!pushToggle) return;
+    if (typeof Notification === 'undefined') {
+      pushToggle.textContent = 'Notifikasi tidak didukung';
+      pushToggle.disabled = true;
+      return;
+    }
+    try {
+      const current = await isSubscribed();
+      updatePushUI(current);
+    } catch (e) {
+      console.warn('Cek status subscription gagal:', e);
+      updatePushUI(false);
+    }
+  }
+
+  if (pushToggle) {
+    await initPushUI();
+    pushToggle.addEventListener('click', async () => {
+      try {
+        pushToggle.disabled = true;
+        const subscribed = await isSubscribed();
+        if (subscribed) {
+          await unsubscribe();
+          updatePushUI(false);
+        } else {
+          await subscribe();
+          updatePushUI(true);
+        }
+      } catch (err) {
+        console.error('Toggle push gagal:', err);
+        alert(`Gagal mengubah notifikasi: ${err.message || err}`);
+        updatePushUI(false);
+      } finally {
+        pushToggle.disabled = false;
+      }
+    });
+  }
 });

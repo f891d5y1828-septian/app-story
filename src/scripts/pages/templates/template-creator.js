@@ -11,11 +11,10 @@ const createStoryItemTemplate = (story) => `
       <p class="story-item__description">${story.description}</p>
     </div>
     <div class="story-item__footer">
-      <a href="#/story/${story.id}" class="story-item__detail-button">Lihat Detail</a>
-      <div class="offline-actions">
-        <button class="save-offline-btn" data-id="${story.id}" aria-label="Simpan story untuk dibaca offline">Simpan Offline</button>
-        <button class="delete-offline-btn" data-id="${story.id}" aria-label="Hapus story dari penyimpanan offline">Hapus Offline</button>
+      <div class="offline-actions" aria-label="Aksi offline">
+        <button class="button toggle-offline-btn" data-id="${story.id}" aria-label="Simpan atau batalkan simpan story">Simpan</button>
       </div>
+      <a href="#/story/${story.id}" class="button primary" aria-label="Lihat detail story">Lihat Detail</a>
     </div>
   </div>
 `;

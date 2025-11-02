@@ -10,8 +10,17 @@ if (self.workbox) {
   workbox.core.skipWaiting();
   workbox.core.clientsClaim();
 
-  // Precaching jika __WB_MANIFEST tersedia (tidak wajib di dev)
-  // workbox.precaching.precacheAndRoute(self.__WB_MANIFEST || []);
+  // Precaching untuk aset penting agar tersedia offline
+  workbox.precaching.precacheAndRoute([
+    { url: '/', revision: '1' },
+    { url: '/index.html', revision: '1' },
+    { url: '/app.bundle.js', revision: '1' },
+    { url: '/app.css', revision: '1' },
+    { url: '/manifest.webmanifest', revision: '1' },
+    { url: '/images/logo.png', revision: '1' },
+    { url: '/images/placeholder-movie.svg', revision: '1' },
+    { url: '/favicon.png', revision: '1' }
+  ]);
 
   // Cache navigasi halaman (SPA) - NetworkFirst
   workbox.routing.registerRoute(
@@ -36,10 +45,23 @@ if (self.workbox) {
     }),
   );
 
-  // Hindari caching berkas HMR (hot-update) saat dev agar tidak memicu abort
+  // Hindari caching berkas HMR (hot-update) dan webpack-dev-server saat dev agar tidak memicu abort
   workbox.routing.registerRoute(
-    ({ url }) => url.pathname.includes('hot-update'),
-    new workbox.strategies.NetworkOnly({}),
+    ({ url }) => url.pathname.includes('hot-update') || 
+                url.pathname.endsWith('.hot-update.json') || 
+                url.pathname.includes('webpack-dev-server') || 
+                url.search.includes('ide_webview_request_time'),
+    new workbox.strategies.NetworkOnly({
+      plugins: [
+        {
+          // Plugin khusus untuk menangani error aborted request
+          fetchDidFail: async ({ request }) => {
+            // Biarkan error aborted terjadi tanpa mencoba cache
+            console.log('Permintaan hot-update gagal, ini normal untuk HMR:', request.url);
+          }
+        }
+      ]
+    }),
   );
 
   // Cache gambar - CacheFirst
@@ -79,15 +101,95 @@ if (self.workbox) {
     'POST',
   );
 
-  // Opsional: fallback offline sederhana untuk navigasi jika jaringan gagal
-  // (Diabaikan untuk saat ini; bisa ditambahkan halaman offline khusus.)
+  // Fallback offline untuk navigasi jika jaringan gagal
+  workbox.routing.setCatchHandler(({ event }) => {
+    if (event.request.destination === 'document') {
+      return caches.match('/index.html');
+    }
+    
+    if (event.request.destination === 'image') {
+      return caches.match('/images/placeholder-movie.svg');
+    }
+    
+    return Response.error();
+  });
 } else {
-  // Fallback minimal bila Workbox tidak tersedia
+  // Fallback offline tanpa Workbox
+  const PRECACHE = 'cinemagic-precache-v1';
+  const RUNTIME_STATIC = 'cinemagic-static-runtime';
+  const RUNTIME_IMAGES = 'cinemagic-images-runtime';
+
+  const PRECACHE_URLS = [
+    '/',
+    '/index.html',
+    '/app.bundle.js',
+    '/manifest.webmanifest',
+    '/images/logo.png',
+    '/images/placeholder-movie.svg',
+    '/favicon.png',
+  ];
+
   self.addEventListener('install', (event) => {
+    event.waitUntil(
+      caches.open(PRECACHE).then((cache) => cache.addAll(PRECACHE_URLS)).catch(() => {})
+    );
     self.skipWaiting();
   });
+
   self.addEventListener('activate', (event) => {
+    event.waitUntil(
+      caches.keys().then((keys) => Promise.all(
+        keys.filter((k) => ![PRECACHE, RUNTIME_STATIC, RUNTIME_IMAGES].includes(k))
+            .map((k) => caches.delete(k))
+      ))
+    );
     self.clients.claim();
+  });
+
+  self.addEventListener('fetch', (event) => {
+    const { request } = event;
+    const url = new URL(request.url);
+
+    // Hanya tangani permintaan asal yang sama
+    if (url.origin !== self.location.origin) return;
+
+    // Navigasi dokumen: fallback ke index.html saat offline
+    if (request.mode === 'navigate') {
+      event.respondWith(
+        fetch(request).catch(() => caches.match('/index.html'))
+      );
+      return;
+    }
+
+    // Aset statis JS/CSS: stale-while-revalidate sederhana
+    if (['script', 'style', 'worker'].includes(request.destination)) {
+      event.respondWith(
+        caches.open(RUNTIME_STATIC).then(async (cache) => {
+          const cached = await cache.match(request);
+          const networkFetch = fetch(request).then((res) => {
+            if (res && res.status === 200) cache.put(request, res.clone());
+            return res;
+          }).catch(() => null);
+          return cached || networkFetch || Response.error();
+        })
+      );
+      return;
+    }
+
+    // Gambar: cache-first dengan placeholder saat offline
+    if (request.destination === 'image') {
+      event.respondWith(
+        caches.open(RUNTIME_IMAGES).then(async (cache) => {
+          const cached = await cache.match(request);
+          if (cached) return cached;
+          return fetch(request).then((res) => {
+            if (res && res.status === 200) cache.put(request, res.clone());
+            return res;
+          }).catch(() => caches.match('/images/placeholder-movie.svg'));
+        })
+      );
+      return;
+    }
   });
 }
 
@@ -103,10 +205,10 @@ self.addEventListener('push', (event) => {
   const title = payload.title || 'CINEMAGIC';
   const options = {
     body: payload.body || 'Ada update terbaru dari CINEMAGIC',
-    icon: payload.icon || 'images/logo.png',
-    badge: payload.badge || 'images/logo.png',
+    icon: payload.icon || '/images/logo.png',
+    badge: payload.badge || '/images/logo.png',
     data: {
-      url: payload.url || './#/stories',
+      url: payload.url || '/#/stories',
       storyId: payload.storyId || null,
     },
     actions: [
@@ -123,11 +225,11 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const data = event.notification && event.notification.data ? event.notification.data : {};
 
-  let targetUrl = data.url || './';
+  let targetUrl = data.url || '/';
   if (event.action === 'open-detail' && data.storyId) {
-    targetUrl = `./#/story/${data.storyId}`;
+    targetUrl = `/#/story/${data.storyId}`;
   } else if (event.action === 'open-stories') {
-    targetUrl = './#/stories';
+    targetUrl = '/#/stories';
   }
 
   event.waitUntil(

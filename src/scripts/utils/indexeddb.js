@@ -1,90 +1,159 @@
-// Util IndexedDB sederhana untuk menyimpan story offline
-// Store: 'savedStories' (keyPath: 'id')
-
-const DB_NAME = 'cinemagic-db';
+// IndexedDB implementation for offline stories
+const DB_NAME = 'StoriesDB';
 const DB_VERSION = 1;
-const STORE_SAVED = 'savedStories';
+const STORE_NAME = 'savedStories';
 
-function openDb() {
+let db = null;
+
+// Initialize IndexedDB
+const initDB = () => {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    if (db) {
+      resolve(db);
+      return;
+    }
 
-    req.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(STORE_SAVED)) {
-        db.createObjectStore(STORE_SAVED, { keyPath: 'id' });
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onerror = () => {
+      console.error('Error opening IndexedDB:', request.error);
+      reject(request.error);
+    };
+
+    request.onsuccess = () => {
+      db = request.result;
+      resolve(db);
+    };
+
+    request.onupgradeneeded = (event) => {
+      const database = event.target.result;
+      
+      // Create object store if it doesn't exist
+      if (!database.objectStoreNames.contains(STORE_NAME)) {
+        const objectStore = database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        objectStore.createIndex('name', 'name', { unique: false });
+        objectStore.createIndex('createdAt', 'createdAt', { unique: false });
       }
     };
-
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
   });
-}
+};
 
-async function withStore(storeName, mode, fn) {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, mode);
-    const store = tx.objectStore(storeName);
-    const result = fn(store);
-    tx.oncomplete = () => resolve(result);
-    tx.onerror = () => reject(tx.error);
-  });
-}
+// Save a story offline
+export const saveOfflineStory = async (story) => {
+  try {
+    const database = await initDB();
+    const transaction = database.transaction([STORE_NAME], 'readwrite');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    
+    const request = objectStore.put({
+      ...story,
+      savedAt: new Date().toISOString()
+    });
 
-export async function saveOfflineStory(story) {
-  // Simpan story lengkap untuk dibaca offline
-  return withStore(STORE_SAVED, 'readwrite', (store) => {
-    store.put(story);
-  });
-}
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(true);
+      request.onerror = () => {
+        console.error('Error saving story:', request.error);
+        reject(request.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error saving story:', error);
+    return false;
+  }
+};
 
-export async function deleteOfflineStory(id) {
-  return withStore(STORE_SAVED, 'readwrite', (store) => {
-    store.delete(id);
-  });
-}
+// Delete a saved story
+export const deleteOfflineStory = async (storyId) => {
+  try {
+    const database = await initDB();
+    const transaction = database.transaction([STORE_NAME], 'readwrite');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    
+    const request = objectStore.delete(storyId);
 
-export async function getOfflineStory(id) {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_SAVED, 'readonly');
-    const store = tx.objectStore(STORE_SAVED);
-    const req = store.get(id);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => reject(req.error);
-  });
-}
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(true);
+      request.onerror = () => {
+        console.error('Error deleting story:', request.error);
+        reject(request.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error deleting story:', error);
+    return false;
+  }
+};
 
-export async function getAllOfflineStories() {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_SAVED, 'readonly');
-    const store = tx.objectStore(STORE_SAVED);
-    const req = store.getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => reject(req.error);
-  });
-}
+// Get all saved story IDs as a Set
+export const getSavedIdsSet = async () => {
+  try {
+    const database = await initDB();
+    const transaction = database.transaction([STORE_NAME], 'readonly');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    
+    const request = objectStore.getAllKeys();
 
-export async function getSavedIdsSet() {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_SAVED, 'readonly');
-    const store = tx.objectStore(STORE_SAVED);
-    const req = store.getAllKeys();
-    req.onsuccess = () => {
-      const ids = new Set((req.result || []).map(String));
-      resolve(ids);
-    };
-    req.onerror = () => reject(req.error);
-  });
-}
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        const keys = request.result.map(key => String(key));
+        resolve(new Set(keys));
+      };
+      request.onerror = () => {
+        console.error('Error getting saved IDs:', request.error);
+        reject(request.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error getting saved IDs:', error);
+    return new Set();
+  }
+};
 
-export default {
-  saveOfflineStory,
-  deleteOfflineStory,
-  getOfflineStory,
-  getAllOfflineStories,
-  getSavedIdsSet,
+// Get all saved stories
+export const getAllSavedStories = async () => {
+  try {
+    const database = await initDB();
+    const transaction = database.transaction([STORE_NAME], 'readonly');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    
+    const request = objectStore.getAll();
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        resolve(request.result || []);
+      };
+      request.onerror = () => {
+        console.error('Error getting all saved stories:', request.error);
+        reject(request.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error getting all saved stories:', error);
+    return [];
+  }
+};
+
+// Get a specific saved story
+export const getSavedStory = async (storyId) => {
+  try {
+    const database = await initDB();
+    const transaction = database.transaction([STORE_NAME], 'readonly');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    
+    const request = objectStore.get(storyId);
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        resolve(request.result || null);
+      };
+      request.onerror = () => {
+        console.error('Error getting saved story:', request.error);
+        reject(request.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error getting saved story:', error);
+    return null;
+  }
 };

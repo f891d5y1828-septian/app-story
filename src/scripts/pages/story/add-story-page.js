@@ -13,7 +13,7 @@ class AddStoryPage {
   async render() {
     return `
       <section class="content">
-        <h1 class="content__heading">Tambah Story Baru</h2>
+        <h1 class="content__heading">Tambah Story Baru</h1>
         <div class="add-story-form">
           <form id="addStoryForm" enctype="multipart/form-data">
             <div class="form-group">
@@ -56,6 +56,7 @@ class AddStoryPage {
               <label>Lokasi</label>
               <div id="mapContainer" class="map-container" aria-label="Peta untuk memilih lokasi"></div>
               <p class="map-help">Klik pada peta atau geser marker untuk memilih lokasi</p>
+              <button type="button" id="useMyLocation" class="location-button" aria-label="Gunakan lokasi saya">Gunakan Lokasi Saya</button>
               <div class="location-info" role="group" aria-label="Koordinat terpilih">
                 <p class="coordinate-label">Data koordinat lokasi:</p>
                 <div class="coordinate-display">
@@ -210,6 +211,39 @@ class AddStoryPage {
     });
 
     setTimeout(() => this._map.invalidateSize(), 100);
+
+    // Gunakan lokasi perangkat (geolocation)
+    const useMyLocationBtn = document.getElementById('useMyLocation');
+    if (useMyLocationBtn) {
+      if ('geolocation' in navigator) {
+        useMyLocationBtn.addEventListener('click', () => {
+          useMyLocationBtn.disabled = true;
+          const originalText = useMyLocationBtn.textContent;
+          useMyLocationBtn.textContent = 'Mengambil Lokasi...';
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const { latitude, longitude } = pos.coords;
+              this._selectedPosition = { lat: latitude, lon: longitude };
+              if (this._marker) this._marker.setLatLng([latitude, longitude]);
+              if (this._map) this._map.setView([latitude, longitude], 15);
+              this._updateCoordinateDisplay(latitude, longitude);
+              useMyLocationBtn.textContent = originalText;
+              useMyLocationBtn.disabled = false;
+            },
+            (err) => {
+              addStoryMessage.textContent = 'Gagal mendapatkan lokasi: ' + err.message;
+              addStoryMessage.classList.add('error');
+              useMyLocationBtn.textContent = originalText;
+              useMyLocationBtn.disabled = false;
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+          );
+        });
+      } else {
+        useMyLocationBtn.disabled = true;
+        useMyLocationBtn.textContent = 'Geolocation tidak didukung';
+      }
+    }
 
     // Submit form
     addStoryForm.addEventListener('submit', async (event) => {

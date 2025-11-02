@@ -13,10 +13,12 @@ class StoryListPage {
   async render() {
     return `
       <section class="content">
-        <h1 class="content__heading">Dicoding Stories</h2>
+        <h1 class="content__heading">Dicoding Stories</h1>
         <div class="list-controls" aria-label="Kontrol daftar story">
-          <input type="search" id="story-search" class="story-search" placeholder="Cari story..." aria-label="Cari story">
-          <select id="story-sort" class="story-sort" aria-label="Urutkan story">
+          <label for="story-search" class="sr-only">Cari story</label>
+          <input type="search" id="story-search" class="story-search" placeholder="Cari story...">
+          <label for="story-sort" class="sr-only">Urutkan story</label>
+          <select id="story-sort" class="story-sort">
             <option value="newest">Terbaru</option>
             <option value="oldest">Terlama</option>
             <option value="name">Nama A-Z</option>
@@ -69,19 +71,16 @@ class StoryListPage {
           });
           // Tandai status tombol berdasarkan IndexedDB
           document.querySelectorAll('.offline-actions').forEach((box) => {
-            const id = box.querySelector('.save-offline-btn')?.dataset.id;
+            const id = box.querySelector('.toggle-offline-btn')?.dataset.id;
             if (!id) return;
             const saved = savedIds.has(String(id));
-            const saveBtn = box.querySelector('.save-offline-btn');
-            const delBtn = box.querySelector('.delete-offline-btn');
+            const toggleBtn = box.querySelector('.toggle-offline-btn');
             if (saved) {
-              saveBtn.textContent = 'Tersimpan';
-              saveBtn.disabled = true;
-              delBtn.disabled = false;
+              toggleBtn.textContent = 'Batalkan Simpan';
+              toggleBtn.classList.add('saved');
             } else {
-              saveBtn.textContent = 'Simpan Offline';
-              saveBtn.disabled = false;
-              delBtn.disabled = true;
+              toggleBtn.textContent = 'Simpan';
+              toggleBtn.classList.remove('saved');
             }
           });
           attachActionHandlers();
@@ -120,21 +119,25 @@ class StoryListPage {
         };
 
         function attachActionHandlers() {
-          document.querySelectorAll('.save-offline-btn').forEach((btn) => {
+          // Toggle single button for save/delete offline
+          document.querySelectorAll('.toggle-offline-btn').forEach((btn) => {
             btn.onclick = async (e) => {
               const id = e.currentTarget.dataset.id;
               const story = allStories.find((s) => String(s.id) === String(id));
-              if (!story) return;
-              await saveOfflineStory(story);
-              savedIds.add(String(id));
-              refresh();
-            };
-          });
-          document.querySelectorAll('.delete-offline-btn').forEach((btn) => {
-            btn.onclick = async (e) => {
-              const id = e.currentTarget.dataset.id;
-              await deleteOfflineStory(id);
-              savedIds.delete(String(id));
+              if (!id) return;
+              const isSaved = savedIds.has(String(id));
+              try {
+                if (isSaved) {
+                  await deleteOfflineStory(id);
+                  savedIds.delete(String(id));
+                } else {
+                  if (!story) return;
+                  await saveOfflineStory(story);
+                  savedIds.add(String(id));
+                }
+              } catch (err) {
+                console.error('Toggle offline failed:', err);
+              }
               refresh();
             };
           });

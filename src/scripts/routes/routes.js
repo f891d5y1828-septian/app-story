@@ -6,6 +6,7 @@ import RegisterPage from '../pages/auth/register-page';
 import StoryListPage from '../pages/story/story-list-page';
 import StoryDetailPage from '../pages/story/story-detail-page';
 import AddStoryPage from '../pages/story/add-story-page';
+import SavedPage from '../pages/saved/saved-page';
 
 const routes = {
   '/': new StoryListPage(),
@@ -16,6 +17,7 @@ const routes = {
   '/login': new LoginPage(),
   '/register': new RegisterPage(),
   '/stories': new StoryListPage(),
+  '/saved': new SavedPage(),
   '/story/:id': new StoryDetailPage(),
 };
 

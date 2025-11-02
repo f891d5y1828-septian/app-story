@@ -1,9 +1,9 @@
 {
   "name": "CINEMAGIC",
   "short_name": "CINEMAGIC",
-  "id": "./",
-  "start_url": "./",
-  "scope": "./",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

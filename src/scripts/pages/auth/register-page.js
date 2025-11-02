@@ -8,7 +8,7 @@ class RegisterPage {
   async render() {
     return `
       <section class="container register-container">
-        <h1 class="register-title">Register</h2>
+        <h1 class="register-title">Register</h1>
         <form id="registerForm" class="register-form">
           <div class="form-group">
             <label for="name">Nama</label>

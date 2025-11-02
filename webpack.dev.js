@@ -4,12 +4,18 @@ const { merge } = require('webpack-merge');
 
 module.exports = merge(common, {
   mode: 'development',
+  devtool: 'inline-source-map',
   module: {
     rules: [
       {
         test: /\.css$/,
         use: [
-          'style-loader',
+          {
+            loader: 'style-loader',
+            options: {
+              insert: 'head'
+            }
+          },
           'css-loader',
         ],
       },
@@ -27,6 +33,11 @@ module.exports = merge(common, {
         warnings: false,
       },
     },
-    hot: true,
+    webSocketServer: false, // Menonaktifkan WebSocket server
+    hot: false,
+    liveReload: false, // Disable live reload
+    watchFiles: { // Disable file watching
+      paths: [],
+    },
   },
 });

@@ -1,2 +1,2 @@
-APP_URL=https://f891d5y1828-septian.github.io/app-story-akhir/
+APP_URL=https://f891d5y1828-septian.github.io/app-story/
 MAP_SERVICE_API_KEY=<api_key>
