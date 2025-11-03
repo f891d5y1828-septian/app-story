@@ -100,21 +100,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!pushToggle) return;
     const permission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
     if (permission === 'denied') {
-      pushToggle.textContent = 'Notifikasi Ditolak';
+      // Tampilkan tombol bantuan agar pengguna bisa memperbaiki izin
+      pushToggle.textContent = 'Notifikasi Ditolak – Buka Panduan';
       pushToggle.setAttribute('aria-pressed', 'false');
-      pushToggle.disabled = true;
+      pushToggle.disabled = false;
+      pushToggle.dataset.action = 'help';
       return;
     }
     if (permission === 'default') {
       pushToggle.textContent = 'Aktifkan Notifikasi';
       pushToggle.setAttribute('aria-pressed', 'false');
       pushToggle.disabled = false;
+      delete pushToggle.dataset.action;
       return;
     }
     // permission === 'granted'
     pushToggle.textContent = isOn ? 'Matikan Notifikasi' : 'Aktifkan Notifikasi';
     pushToggle.setAttribute('aria-pressed', isOn ? 'true' : 'false');
     pushToggle.disabled = false;
+    delete pushToggle.dataset.action;
   }
 
   async function initPushUI() {
@@ -138,6 +142,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     pushToggle.addEventListener('click', async () => {
       try {
         pushToggle.disabled = true;
+        const permission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+        if (permission === 'denied' || pushToggle.dataset.action === 'help') {
+          // Tampilkan panduan cara mengizinkan notifikasi
+          alert('Notifikasi ditolak oleh browser.\n\nCara mengaktifkan kembali:\n1) Klik ikon gembok di kiri URL → Site settings → Notifications → Allow.\n2) Atau buka chrome://settings/content/notifications lalu izinkan untuk f891d5y1828-septian.github.io.\n3) Setelah mengizinkan, reload halaman dan klik “Aktifkan Notifikasi”.');
+          updatePushUI(false);
+          return;
+        }
         const subscribed = await isSubscribed();
         if (subscribed) {
           await unsubscribe();
