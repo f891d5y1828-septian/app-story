@@ -16,7 +16,8 @@ export async function getRegistration() {
   let reg = await navigator.serviceWorker.getRegistration();
   if (!reg) {
     try {
-      reg = await navigator.serviceWorker.register('/sw.js');
+      // Use relative path so it works on subpath deployments (e.g., GitHub Pages)
+      reg = await navigator.serviceWorker.register('./sw.js');
     } catch (e) {
       return null;
     }
@@ -49,11 +50,6 @@ export async function subscribe() {
   if (!reg) throw new Error('Service Worker belum terdaftar');
 
   const vapid = localStorage.getItem('vapidPublicKey') || CONFIG.VAPID_PUBLIC_KEY;
-  console.log('VAPID Debug:', {
-    localStorage: localStorage.getItem('vapidPublicKey'),
-    config: CONFIG.VAPID_PUBLIC_KEY,
-    final: vapid
-  });
   if (!vapid) {
     throw new Error('VAPID public key belum diisi. Silakan isi di CONFIG atau localStorage.vapidPublicKey');
   }
