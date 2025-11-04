@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (permission === 'denied') {
       pushToggle.textContent = 'Aktifkan Notifikasi';
       pushToggle.setAttribute('aria-pressed', 'false');
-      pushToggle.disabled = false; // Tetap aktif
+      pushToggle.disabled = false; // Tetap aktif agar pengguna bisa mencoba lagi
       return;
     }
 
