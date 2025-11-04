@@ -99,26 +99,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   function updatePushUI(isOn) {
     if (!pushToggle) return;
     const permission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+
     if (permission === 'denied') {
-      // Tampilkan tombol bantuan agar pengguna bisa memperbaiki izin
-      pushToggle.textContent = 'Panduan Notifikasi';
+      pushToggle.textContent = 'Aktifkan Notifikasi';
       pushToggle.setAttribute('aria-pressed', 'false');
-      pushToggle.disabled = false;
-      pushToggle.dataset.action = 'help';
+      pushToggle.disabled = false; // Tetap aktif
       return;
     }
+
     if (permission === 'default') {
       pushToggle.textContent = 'Aktifkan Notifikasi';
       pushToggle.setAttribute('aria-pressed', 'false');
       pushToggle.disabled = false;
-      delete pushToggle.dataset.action;
       return;
     }
+
     // permission === 'granted'
     pushToggle.textContent = isOn ? 'Matikan Notifikasi' : 'Aktifkan Notifikasi';
     pushToggle.setAttribute('aria-pressed', isOn ? 'true' : 'false');
     pushToggle.disabled = false;
-    delete pushToggle.dataset.action;
   }
 
   async function initPushUI() {
@@ -142,20 +141,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     pushToggle.addEventListener('click', async () => {
       try {
         pushToggle.disabled = true;
-        const permission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
-        if (permission === 'denied' || pushToggle.dataset.action === 'help') {
-          // Tampilkan panduan cara mengizinkan notifikasi
-          alert(
-            'Notifikasi saat ini diblokir oleh browser.\n\n'
-            + 'Untuk mengaktifkan kembali, ikuti langkah berikut:\n'
-            + '1. Klik ikon gembok (atau ikon "i") di sebelah kiri alamat situs.\n'
-            + '2. Buka "Site settings" (Pengaturan Situs).\n'
-            + '3. Cari "Notifications" (Notifikasi) dan ubah dari "Block" menjadi "Allow".\n'
-            + '4. Muat ulang halaman ini.',
-          );
-          updatePushUI(false);
-          return;
-        }
         const subscribed = await isSubscribed();
         if (subscribed) {
           await unsubscribe();
@@ -167,7 +152,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       } catch (err) {
         console.error('Toggle push gagal:', err);
         alert(`Gagal mengubah notifikasi: ${err.message || err}`);
-        updatePushUI(false);
+        // Kembalikan state UI ke sebelum aksi gagal
+        const subscribed = await isSubscribed();
+        updatePushUI(subscribed);
       } finally {
         pushToggle.disabled = false;
       }
