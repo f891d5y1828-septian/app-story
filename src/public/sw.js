@@ -159,7 +159,7 @@ if (self.workbox) {
     // Navigasi dokumen: fallback ke index.html saat offline
     if (request.mode === 'navigate') {
       event.respondWith(
-        fetch(request).catch(() => caches.match('/index.html'))
+        fetch(request).catch(() => caches.match('./index.html'))
       );
       return;
     }

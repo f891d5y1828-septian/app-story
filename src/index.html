@@ -6,6 +6,18 @@
     <meta name="theme-color" content="#222222" />
     <link rel="shortcut icon" href="favicon.png">
     <link rel="manifest" href="manifest.webmanifest">
+    <script>
+      // Fallback: pastikan VAPID public key tersedia sebelum bundle dijalankan
+      (function() {
+        try {
+          var key = localStorage.getItem('vapidPublicKey');
+          if (!key) {
+            // Nilai dari CONFIG.VAPID_PUBLIC_KEY (public, bukan rahasia)
+            localStorage.setItem('vapidPublicKey', 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk');
+          }
+        } catch (e) { /* ignore */ }
+      })();
+    </script>
     <!-- Leaflet CSS -->
     <link
       rel="stylesheet"
