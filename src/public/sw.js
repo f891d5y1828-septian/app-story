@@ -14,14 +14,14 @@ if (self.workbox) {
   // Use relative paths to respect subpath scope (e.g., GitHub Pages)
   // Bump revisions to force cache invalidation
   workbox.precaching.precacheAndRoute([
-    { url: './', revision: '2' },
-    { url: './index.html', revision: '2' },
-    { url: './app.bundle.js', revision: '2' },
-    { url: './app.css', revision: '2' },
-    { url: './manifest.webmanifest', revision: '2' },
-    { url: './images/logo.png', revision: '2' },
-    { url: './images/placeholder-movie.svg', revision: '2' },
-    { url: './favicon.png', revision: '2' }
+    { url: './', revision: '3' },
+    { url: './index.html', revision: '3' },
+    { url: './app.bundle.js', revision: '3' },
+    { url: './app.css', revision: '3' },
+    { url: './manifest.webmanifest', revision: '3' },
+    { url: './images/logo.png', revision: '3' },
+    { url: './images/placeholder-movie.svg', revision: '3' },
+    { url: './favicon.png', revision: '3' }
   ]);
 
   // Cache navigasi halaman (SPA) - NetworkFirst
@@ -106,13 +106,13 @@ if (self.workbox) {
   // Fallback offline untuk navigasi jika jaringan gagal
   workbox.routing.setCatchHandler(({ event }) => {
     if (event.request.destination === 'document') {
-      return caches.match('/index.html');
+      return caches.match('./index.html');
     }
-    
+
     if (event.request.destination === 'image') {
-      return caches.match('/images/placeholder-movie.svg');
+      return caches.match('./images/placeholder-movie.svg');
     }
-    
+
     return Response.error();
   });
 } else {
@@ -188,7 +188,7 @@ if (self.workbox) {
           return fetch(request).then((res) => {
             if (res && res.status === 200) cache.put(request, res.clone());
             return res;
-          }).catch(() => caches.match('/images/placeholder-movie.svg'));
+          }).catch(() => caches.match('./images/placeholder-movie.svg'));
         })
       );
       return;
@@ -208,10 +208,10 @@ self.addEventListener('push', (event) => {
   const title = payload.title || 'CINEMAGIC';
   const options = {
     body: payload.body || 'Ada update terbaru dari CINEMAGIC',
-    icon: payload.icon || '/images/logo.png',
-    badge: payload.badge || '/images/logo.png',
+    icon: payload.icon || './images/logo.png',
+    badge: payload.badge || './images/logo.png',
     data: {
-      url: payload.url || '/#/stories',
+      url: payload.url || './#/stories',
       storyId: payload.storyId || null,
     },
     actions: [
@@ -228,11 +228,11 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const data = event.notification && event.notification.data ? event.notification.data : {};
 
-  let targetUrl = data.url || '/';
+  let targetUrl = data.url || './';
   if (event.action === 'open-detail' && data.storyId) {
-    targetUrl = `/#/story/${data.storyId}`;
+    targetUrl = `./#/story/${data.storyId}`;
   } else if (event.action === 'open-stories') {
-    targetUrl = '/#/stories';
+    targetUrl = './#/stories';
   }
 
   event.waitUntil(
