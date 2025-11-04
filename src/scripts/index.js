@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const permission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
     if (permission === 'denied') {
       // Tampilkan tombol bantuan agar pengguna bisa memperbaiki izin
-      pushToggle.textContent = 'Notifikasi Ditolak – Buka Panduan';
+      pushToggle.textContent = 'Panduan Notifikasi';
       pushToggle.setAttribute('aria-pressed', 'false');
       pushToggle.disabled = false;
       pushToggle.dataset.action = 'help';
@@ -145,7 +145,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const permission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
         if (permission === 'denied' || pushToggle.dataset.action === 'help') {
           // Tampilkan panduan cara mengizinkan notifikasi
-          alert('Notifikasi ditolak oleh browser.\n\nCara mengaktifkan kembali:\n1) Klik ikon gembok di kiri URL → Site settings → Notifications → Allow.\n2) Atau buka chrome://settings/content/notifications lalu izinkan untuk f891d5y1828-septian.github.io.\n3) Setelah mengizinkan, reload halaman dan klik “Aktifkan Notifikasi”.');
+          alert(
+            'Notifikasi saat ini diblokir oleh browser.\n\n'
+            + 'Untuk mengaktifkan kembali, ikuti langkah berikut:\n'
+            + '1. Klik ikon gembok (atau ikon "i") di sebelah kiri alamat situs.\n'
+            + '2. Buka "Site settings" (Pengaturan Situs).\n'
+            + '3. Cari "Notifications" (Notifikasi) dan ubah dari "Block" menjadi "Allow".\n'
+            + '4. Muat ulang halaman ini.',
+          );
           updatePushUI(false);
           return;
         }

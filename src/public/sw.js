@@ -11,15 +11,17 @@ if (self.workbox) {
   workbox.core.clientsClaim();
 
   // Precaching untuk aset penting agar tersedia offline
+  // Use relative paths to respect subpath scope (e.g., GitHub Pages)
+  // Bump revisions to force cache invalidation
   workbox.precaching.precacheAndRoute([
-    { url: '/', revision: '1' },
-    { url: '/index.html', revision: '1' },
-    { url: '/app.bundle.js', revision: '1' },
-    { url: '/app.css', revision: '1' },
-    { url: '/manifest.webmanifest', revision: '1' },
-    { url: '/images/logo.png', revision: '1' },
-    { url: '/images/placeholder-movie.svg', revision: '1' },
-    { url: '/favicon.png', revision: '1' }
+    { url: './', revision: '2' },
+    { url: './index.html', revision: '2' },
+    { url: './app.bundle.js', revision: '2' },
+    { url: './app.css', revision: '2' },
+    { url: './manifest.webmanifest', revision: '2' },
+    { url: './images/logo.png', revision: '2' },
+    { url: './images/placeholder-movie.svg', revision: '2' },
+    { url: './favicon.png', revision: '2' }
   ]);
 
   // Cache navigasi halaman (SPA) - NetworkFirst
@@ -119,14 +121,15 @@ if (self.workbox) {
   const RUNTIME_STATIC = 'cinemagic-static-runtime';
   const RUNTIME_IMAGES = 'cinemagic-images-runtime';
 
+  // Use relative paths to respect subpath scope (e.g., GitHub Pages)
   const PRECACHE_URLS = [
-    '/',
-    '/index.html',
-    '/app.bundle.js',
-    '/manifest.webmanifest',
-    '/images/logo.png',
-    '/images/placeholder-movie.svg',
-    '/favicon.png',
+    './',
+    './index.html',
+    './app.bundle.js',
+    './manifest.webmanifest',
+    './images/logo.png',
+    './images/placeholder-movie.svg',
+    './favicon.png',
   ];
 
   self.addEventListener('install', (event) => {
