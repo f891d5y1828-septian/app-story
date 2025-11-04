@@ -7,6 +7,19 @@ import CONFIG from './config';
 import { isSubscribed, subscribe, unsubscribe } from './utils/push-manager';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Pastikan VAPID Public Key tersedia di localStorage sebagai fallback
+  try {
+    const existingVapid = localStorage.getItem('vapidPublicKey');
+    if (!existingVapid) {
+      // Sinkronkan dengan nilai dari CONFIG bila tersedia
+      if (typeof CONFIG !== 'undefined' && CONFIG.VAPID_PUBLIC_KEY) {
+        localStorage.setItem('vapidPublicKey', CONFIG.VAPID_PUBLIC_KEY);
+      }
+    }
+  } catch (_) {
+    // abaikan jika storage tidak tersedia
+  }
+
   const app = new App({
     content: document.querySelector('#main-content'),
     drawerButton: document.querySelector('#drawer-button'),
