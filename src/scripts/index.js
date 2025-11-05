@@ -4,7 +4,7 @@ import '../styles/styles.css';
 import App from './pages/app';
 import AuthModel from './model/auth-model';
 import CONFIG from './config';
-import { isSubscribed, subscribe, unsubscribe } from './utils/push-manager';
+import { isSubscribed, subscribe, unsubscribe, showTestNotification } from './utils/push-manager';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Pastikan VAPID Public Key tersedia di localStorage sebagai fallback
@@ -161,6 +161,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
           await subscribe();
           updatePushUI(true);
+          // Tampilkan notifikasi uji setelah berhasil subscribe
+          await showTestNotification();
         }
       } catch (err) {
         console.error('Toggle push gagal:', err);

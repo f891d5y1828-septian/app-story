@@ -106,3 +106,31 @@ export async function unsubscribe() {
   localStorage.removeItem('pushSubscription');
   return true;
 }
+
+// Menampilkan notifikasi uji untuk verifikasi UI
+export async function showTestNotification() {
+  try {
+    // Pastikan izin diberikan
+    const permission = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+    if (permission !== 'granted') {
+      return false;
+    }
+
+    const reg = await getRegistration();
+    if (!reg) return false;
+
+    await reg.showNotification('CINEMAGIC', {
+      body: 'Notifikasi aktif! Cerita baru tersedia.',
+      icon: './images/logo.png',
+      badge: './images/logo.png',
+      data: {
+        url: './#/stories',
+        storyId: 'demo-notif',
+      },
+    });
+
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
