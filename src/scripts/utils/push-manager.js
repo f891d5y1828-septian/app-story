@@ -49,7 +49,7 @@ export async function subscribe() {
   const reg = await getRegistration();
   if (!reg) throw new Error('Service Worker belum terdaftar');
 
-  const vapid = localStorage.getItem('vapidPublicKey') || CONFIG.VAPID_PUBLIC_KEY;
+  const vapid = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
   if (!vapid) {
     throw new Error('VAPID public key belum diisi. Silakan isi di CONFIG atau localStorage.vapidPublicKey');
   }
