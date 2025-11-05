@@ -42,8 +42,11 @@ export async function isSubscribed() {
 
 export async function subscribe() {
   const permission = await Notification.requestPermission();
+  if (permission === 'denied') {
+    throw new Error('Izin notifikasi diblokir. Mohon izinkan dari pengaturan browser.');
+  }
   if (permission !== 'granted') {
-    throw new Error('Izin notifikasi tidak diberikan');
+    throw new Error('Izin notifikasi tidak diberikan.');
   }
 
   const reg = await getRegistration();
