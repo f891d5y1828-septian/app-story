@@ -18,7 +18,12 @@ export async function getRegistration() {
     try {
       // Use relative path so it works on subpath deployments (e.g., GitHub Pages)
       reg = await navigator.serviceWorker.register('./sw.js');
+      console.log('Service Worker registered, waiting for activation...');
+      // Wait for the service worker to be active
+      await navigator.serviceWorker.ready;
+      console.log('Service Worker is ready');
     } catch (e) {
+      console.error('Service Worker registration failed:', e);
       return null;
     }
   }
@@ -41,7 +46,11 @@ export async function isSubscribed() {
 }
 
 export async function subscribe() {
+  console.log('Starting subscription process...');
+  
   const permission = await Notification.requestPermission();
+  console.log('Notification permission status:', permission);
+  
   if (permission === 'denied') {
     throw new Error('Izin notifikasi diblokir. Mohon izinkan dari pengaturan browser.');
   }
@@ -50,18 +59,31 @@ export async function subscribe() {
   }
 
   const reg = await getRegistration();
-  if (!reg) throw new Error('Service Worker belum terdaftar');
+  if (!reg) {
+    throw new Error('Service Worker belum terdaftar');
+  }
+  
+  console.log('Service Worker registration:', reg);
+  console.log('Service Worker state:', reg.active ? 'active' : 'not active');
+  
+  // Ensure service worker is active before subscribing
+  if (!reg.active) {
+    throw new Error('Service Worker belum aktif. Mohon tunggu beberapa saat dan coba lagi.');
+  }
 
   const vapid = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
   if (!vapid) {
     throw new Error('VAPID public key belum diisi. Silakan isi di CONFIG atau localStorage.vapidPublicKey');
   }
 
+  console.log('Attempting to subscribe with VAPID key...');
+  
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(vapid),
   });
 
+  console.log('Subscription successful:', sub);
   localStorage.setItem('pushSubscription', JSON.stringify(sub));
 
   // Optional: kirim subscription ke server Anda jika endpoint tersedia
