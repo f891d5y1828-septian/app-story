@@ -8,7 +8,7 @@ class LoginPage {
   async render() {
     return `
       <section class="container login-container">
-        <h1 class="login-title">Login</h2>
+        <h1 class="login-title">Login</h1>
         <form id="loginForm" class="login-form">
           <div class="form-group">
             <label for="email">Email</label>

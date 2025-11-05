@@ -14,14 +14,14 @@ if (self.workbox) {
   // Use relative paths to respect subpath scope (e.g., GitHub Pages)
   // Bump revisions to force cache invalidation
   workbox.precaching.precacheAndRoute([
-    { url: './', revision: '5' },
-    { url: './index.html', revision: '5' },
-    { url: './app.bundle.js', revision: '5' },
-    { url: './app.css', revision: '5' },
-    { url: './manifest.webmanifest', revision: '5' },
-    { url: './images/logo.png', revision: '5' },
-    { url: './images/placeholder-movie.svg', revision: '5' },
-    { url: './favicon.png', revision: '5' }
+    { url: './' },
+    { url: './index.html' },
+    { url: './app.bundle.js' },
+    { url: './app.css' },
+    { url: './manifest.webmanifest' },
+    { url: './images/logo.png' },
+    { url: './images/placeholder-movie.svg' },
+    { url: './favicon.png' }
   ]);
 
   // Cache navigasi halaman (SPA) - NetworkFirst

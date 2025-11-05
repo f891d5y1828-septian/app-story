@@ -21,7 +21,7 @@ const createStoryItemTemplate = (story) => `
 
 const createStoryDetailTemplate = (story) => `
   <div class="story-detail">
-    <h1 class="story-detail__title">${story.name}</h2>
+    <h1 class="story-detail__title">${story.name}</h1>
     <p class="story-detail__date">${new Date(story.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
     <img class="story-detail__image" src="${story.photoUrl}" alt="${story.name}" crossorigin="anonymous" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='./images/placeholder-movie.svg';">
     <div class="story-detail__info">
