@@ -9,8 +9,13 @@ import { isSubscribed, subscribe, unsubscribe, showTestNotification } from './ut
 document.addEventListener('DOMContentLoaded', async () => {
   // Sinkronisasi VAPID ke localStorage tanpa syarat jika tersedia di CONFIG
   try {
-    if (typeof CONFIG !== 'undefined' && CONFIG.VAPID_PUBLIC_KEY) {
-      localStorage.setItem('vapidPublicKey', CONFIG.VAPID_PUBLIC_KEY);
+    const fromModule = (typeof CONFIG !== 'undefined' && CONFIG.VAPID_PUBLIC_KEY) ? CONFIG.VAPID_PUBLIC_KEY : '';
+    const fromGlobal = (typeof globalThis !== 'undefined' && globalThis.CONFIG && globalThis.CONFIG.VAPID_PUBLIC_KEY)
+      ? globalThis.CONFIG.VAPID_PUBLIC_KEY
+      : '';
+    const value = fromModule || fromGlobal;
+    if (value) {
+      localStorage.setItem('vapidPublicKey', value);
       console.log('[Init] VAPID key synced to localStorage');
     }
   } catch (_) {
