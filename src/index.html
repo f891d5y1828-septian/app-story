@@ -3,26 +3,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#222222" />
+    <meta name="theme-color" content="#3f51b5" />
     <link rel="shortcut icon" href="favicon.png">
     <link rel="manifest" href="manifest.webmanifest">
     <script>
-      // Fallback: pastikan VAPID public key tersedia sebelum bundle dijalankan
-      (function() {
-        try {
-          var key = localStorage.getItem('vapidPublicKey');
-          if (!key) {
-            // Nilai dari CONFIG.VAPID_PUBLIC_KEY (public, bukan rahasia)
-            localStorage.setItem('vapidPublicKey', 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk');
-          }
-        } catch (e) { /* ignore */ }
-      })();
+      // Cek apakah VAPID key sudah ada di localStorage
+      var key = localStorage.getItem('vapidPublicKey');
+      if (!key) {
+        // Jika belum ada, set dari sini (fallback jika CONFIG tidak termuat)
+        // Sebaiknya ini dikelola melalui proses build atau file konfigurasi terpusat
+        // localStorage.setItem('vapidPublicKey', 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk');
+      }
     </script>
-    <!-- Leaflet CSS -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
 
     <title>CINEMAGIC</title>
   </head>
