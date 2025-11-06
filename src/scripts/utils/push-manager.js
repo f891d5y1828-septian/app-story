@@ -40,7 +40,7 @@ export async function getRegistration() {
   if (!reg) {
     try {
       // Use relative path so it works on subpath deployments (e.g., GitHub Pages)
-      reg = await navigator.serviceWorker.register('./sw-v2.js');
+      reg = await navigator.serviceWorker.register('./sw.js');
       console.log('Service Worker registered, waiting for activation...');
       // Wait for the service worker to be active
       await navigator.serviceWorker.ready;
