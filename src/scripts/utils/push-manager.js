@@ -1,5 +1,18 @@
 import CONFIG from '../config';
 
+// Helper: ambil VAPID public key dari CONFIG atau localStorage
+function getVapidPublicKey() {
+  try {
+    // Prioritaskan dari CONFIG
+    if (CONFIG && CONFIG.VAPID_PUBLIC_KEY) return CONFIG.VAPID_PUBLIC_KEY;
+    // Fallback ke localStorage
+    const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('vapidPublicKey') : null;
+    return stored || '';
+  } catch (_) {
+    return CONFIG && CONFIG.VAPID_PUBLIC_KEY ? CONFIG.VAPID_PUBLIC_KEY : '';
+  }
+}
+
 const urlBase64ToUint8Array = (base64String) => {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -71,7 +84,8 @@ export async function subscribe() {
     throw new Error('Service Worker belum aktif. Mohon tunggu beberapa saat dan coba lagi.');
   }
 
-  const vapid = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
+  // Ambil VAPID dari CONFIG atau localStorage
+  const vapid = getVapidPublicKey();
   if (!vapid) {
     throw new Error('VAPID public key belum diisi. Silakan isi di CONFIG atau localStorage.vapidPublicKey');
   }
