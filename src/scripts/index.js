@@ -7,14 +7,11 @@ import CONFIG from './config';
 import { isSubscribed, subscribe, unsubscribe, showTestNotification } from './utils/push-manager';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Pastikan VAPID Public Key tersedia di localStorage sebagai fallback
+  // Sinkronisasi VAPID ke localStorage tanpa syarat jika tersedia di CONFIG
   try {
-    const existingVapid = localStorage.getItem('vapidPublicKey');
-    if (!existingVapid) {
-      // Sinkronkan dengan nilai dari CONFIG bila tersedia
-      if (typeof CONFIG !== 'undefined' && CONFIG.VAPID_PUBLIC_KEY) {
-        localStorage.setItem('vapidPublicKey', CONFIG.VAPID_PUBLIC_KEY);
-      }
+    if (typeof CONFIG !== 'undefined' && CONFIG.VAPID_PUBLIC_KEY) {
+      localStorage.setItem('vapidPublicKey', CONFIG.VAPID_PUBLIC_KEY);
+      console.log('[Init] VAPID key synced to localStorage');
     }
   } catch (_) {
     // abaikan jika storage tidak tersedia

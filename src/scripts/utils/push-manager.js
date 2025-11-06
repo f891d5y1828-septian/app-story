@@ -3,12 +3,22 @@ import CONFIG from '../config';
 // Helper: ambil VAPID public key dari CONFIG atau localStorage
 function getVapidPublicKey() {
   try {
-    // Prioritaskan dari CONFIG
-    if (CONFIG && CONFIG.VAPID_PUBLIC_KEY) return CONFIG.VAPID_PUBLIC_KEY;
-    // Fallback ke localStorage
-    const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('vapidPublicKey') : null;
-    return stored || '';
-  } catch (_) {
+    const fromConfig = (CONFIG && CONFIG.VAPID_PUBLIC_KEY) ? CONFIG.VAPID_PUBLIC_KEY : '';
+    const fromGlobal = (typeof globalThis !== 'undefined' && globalThis.CONFIG && globalThis.CONFIG.VAPID_PUBLIC_KEY)
+      ? globalThis.CONFIG.VAPID_PUBLIC_KEY
+      : '';
+    const fromStorage = typeof localStorage !== 'undefined' ? (localStorage.getItem('vapidPublicKey') || '') : '';
+
+    const resolved = fromConfig || fromGlobal || fromStorage;
+    console.log('[PushManager] VAPID resolution:', {
+      fromConfig: !!fromConfig,
+      fromGlobal: !!fromGlobal,
+      fromStorage: !!fromStorage,
+      resolvedLength: resolved ? resolved.length : 0,
+    });
+    return resolved;
+  } catch (err) {
+    console.warn('[PushManager] getVapidPublicKey error, fallback to CONFIG', err);
     return CONFIG && CONFIG.VAPID_PUBLIC_KEY ? CONFIG.VAPID_PUBLIC_KEY : '';
   }
 }
