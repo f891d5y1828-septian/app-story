@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('load', () => {
       // Daftarkan Service Worker di semua mode (dev dan prod).
       // HMR sudah dimatikan di konfigurasi dev, sehingga SW aman dijalankan.
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register('./sw-v2.js')
         .then((reg) => {
           console.log('Service Worker terdaftar:', reg.scope);
         })
