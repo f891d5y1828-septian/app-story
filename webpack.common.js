@@ -27,6 +27,13 @@ module.exports = {
         {
           from: path.resolve(__dirname, 'src/public/'),
           to: path.resolve(__dirname, 'dist/'),
+          globOptions: {
+            ignore: ['**/index.html'],
+          },
+        },
+        {
+          from: path.resolve(__dirname, 'src/scripts/sw-custom.js'),
+          to: path.resolve(__dirname, 'dist/'),
         },
       ],
     }),
