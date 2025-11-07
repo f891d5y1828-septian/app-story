@@ -6,6 +6,22 @@ import AuthModel from './model/auth-model';
 import CONFIG from './config';
 import { isSubscribed, subscribe, unsubscribe, showTestNotification } from './utils/push-manager';
 
+// Sinkronisasi VAPID ke localStorage sedini mungkin (tanpa menunggu DOMContentLoaded)
+try {
+  const fromModule = (typeof CONFIG !== 'undefined' && CONFIG.VAPID_PUBLIC_KEY) ? CONFIG.VAPID_PUBLIC_KEY : '';
+  const fromGlobal = (typeof globalThis !== 'undefined' && globalThis.CONFIG && globalThis.CONFIG.VAPID_PUBLIC_KEY)
+    ? globalThis.CONFIG.VAPID_PUBLIC_KEY
+    : '';
+  const value = fromModule || fromGlobal;
+  if (value) {
+    localStorage.setItem('vapidPublicKey', value);
+    // Jangan spam log; cukup info singkat
+    console.log('[Init] VAPID key pre-synced to localStorage');
+  }
+} catch (_) {
+  // abaikan jika storage tidak tersedia
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   // Sinkronisasi VAPID ke localStorage tanpa syarat jika tersedia di CONFIG
   try {

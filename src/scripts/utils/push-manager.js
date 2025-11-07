@@ -9,27 +9,13 @@ function getVapidPublicKey() {
       : '';
     const fromStorage = typeof localStorage !== 'undefined' ? (localStorage.getItem('vapidPublicKey') || '') : '';
 
-    let resolved = fromConfig || fromGlobal || fromStorage;
+    const resolved = fromConfig || fromGlobal || fromStorage;
     console.log('[PushManager] VAPID resolution:', {
       fromConfig: !!fromConfig,
       fromGlobal: !!fromGlobal,
       fromStorage: !!fromStorage,
       resolvedLength: resolved ? resolved.length : 0,
     });
-    // Jika belum ada, minta pengguna memasukkan VAPID key sekali, simpan ke localStorage
-    if (!resolved && typeof window !== 'undefined') {
-      try {
-        const input = window.prompt('Masukkan VAPID public key (Base64 URL-safe):');
-        if (input && input.trim()) {
-          const value = input.trim();
-          localStorage.setItem('vapidPublicKey', value);
-          resolved = value;
-          console.log('[PushManager] VAPID key saved to localStorage');
-        }
-      } catch (_) {
-        // ignore prompt/storage errors
-      }
-    }
     return resolved;
   } catch (err) {
     console.warn('[PushManager] getVapidPublicKey error, fallback to CONFIG', err);
